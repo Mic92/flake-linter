@@ -1,0 +1,49 @@
+[build-system]
+requires = ["setuptools"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "flake-linter"
+description = "Find duplicate dependencies in flakes"
+version = "1.0.0"
+authors = [{ name = "Jörg Thalheim", email = "joerg@thalheim.io" }]
+license = { text = "MIT" }
+classifiers = [
+  "Development Status :: 5 - Production/Stable",
+  "Environment :: Console",
+  "Topic :: Utilities",
+  "Intended Audience :: Developers",
+]
+
+[project.urls]
+Homepage = "https://github.com/Mic92/flake-linter"
+
+[project.scripts]
+flake-linter = "flake_linter:main"
+
+[tool.ruff]
+target-version = "py311"
+line-length = 88
+
+select = ["ALL"]
+ignore = [
+  "D",
+  "T201",
+  "E501"
+]
+
+[tool.mypy]
+python_version = "3.11"
+pretty = true
+warn_redundant_casts = true
+disallow_untyped_calls = true
+disallow_untyped_defs = true
+no_implicit_optional = true
+
+[[tool.mypy.overrides]]
+module = "setuptools.*"
+ignore_missing_imports = true
+
+[[tool.mypy.overrides]]
+module = "pytest.*"
+ignore_missing_imports = true
