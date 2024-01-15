@@ -12,11 +12,11 @@ def flake_url(dep: dict[str, Any]) -> str | None:
     if locked is None:
         return None
     match locked["type"]:
-        case "github", "gitlab", "sourcehut":
+        case "github" | "gitlab" | "sourcehut":
             url = f"{locked['type']}:{locked['owner']}/{locked['repo']}"
             if host := locked.get("host"): # gitlab / sourcehut
                 url += f"?host={host}"
-        case "git", "path", "hg":
+        case "git" | "path" | "hg":
             return f"{locked['type']}:{locked['url']}"
         case _:
             print(f"Unknown input type {locked['type']}")
