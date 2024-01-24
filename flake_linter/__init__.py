@@ -14,8 +14,9 @@ def flake_url(dep: dict[str, Any]) -> str | None:
     match locked["type"]:
         case "github" | "gitlab" | "sourcehut":
             url = f"{locked['type']}:{locked['owner']}/{locked['repo']}"
-            if host := locked.get("host"): # gitlab / sourcehut
+            if host := locked.get("host"):  # gitlab / sourcehut
                 url += f"?host={host}"
+            return url
         case "git" | "path" | "hg":
             return f"{locked['type']}:{locked['url']}"
         case _:
@@ -27,6 +28,12 @@ def flake_url(dep: dict[str, Any]) -> str | None:
 class Flake:
     deps: dict[str, list[str]]
     reverse_deps: dict[str, list[str]]
+
+
+@dataclass
+class Options:
+    lock_path: Path
+    verbose: bool
 
 
 def analyze_flake(flake_lock: dict[str, Any]) -> Flake:
@@ -46,9 +53,10 @@ def analyze_flake(flake_lock: dict[str, Any]) -> Flake:
     return Flake(deps, reverse_deps)
 
 
-def parse_args() -> Path:
+def parse_args() -> Options:
     parser = argparse.ArgumentParser()
     parser.add_argument("flake_lock", nargs="?", default="flake.lock")
+    parser.add_argument("--verbose", action="store_true")
     args = parser.parse_args()
     lock_path = Path(args.flake_lock)
     if lock_path.is_dir():
@@ -58,15 +66,17 @@ def parse_args() -> Path:
         print(f"flake.lock not found at {lock_path}", file=sys.stderr)
         sys.exit(1)
 
-    return lock_path
+    return Options(lock_path=lock_path, verbose=args.verbose)
 
 
 def main() -> None:
-    lock_path = parse_args()
-    flake = analyze_flake(json.loads(lock_path.read_text()))
+    options = parse_args()
+    flake = analyze_flake(json.loads(options.lock_path.read_text()))
 
     for url, aliases in flake.deps.items():
         if len(aliases) == 1:
+            if options.verbose:
+                print(f"{url} is only used by {aliases[0]}")
             continue
         print(f"{url} has multiple versions:")
         for alias in aliases:
