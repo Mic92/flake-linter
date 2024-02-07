@@ -17,8 +17,10 @@ def flake_url(dep: dict[str, Any]) -> str | None:
             if host := locked.get("host"):  # gitlab / sourcehut
                 url += f"?host={host}"
             return url
-        case "git" | "path" | "hg":
+        case "git" | "hg":
             return f"{locked['type']}:{locked['url']}"
+        case "path":
+            return f"{locked['type']}:{locked['path']}"
         case _:
             print(f"Unknown input type {locked['type']}")
     return None
