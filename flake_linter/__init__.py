@@ -36,7 +36,7 @@ class Flake:
 class Options:
     lock_path: Path
     verbose: bool
-
+    fail_if_multiple_versions: bool = False
 
 def analyze_flake(flake_lock: dict[str, Any]) -> Flake:
     reverse_deps = defaultdict(list)
@@ -59,6 +59,7 @@ def parse_args() -> Options:
     parser = argparse.ArgumentParser()
     parser.add_argument("flake_lock", nargs="?", default="flake.lock")
     parser.add_argument("--verbose", action="store_true")
+    parser.add_argument("--fail-if-multiple-versions", action="store_true")
     args = parser.parse_args()
     lock_path = Path(args.flake_lock)
     if lock_path.is_dir():
@@ -68,23 +69,27 @@ def parse_args() -> Options:
         print(f"flake.lock not found at {lock_path}", file=sys.stderr)
         sys.exit(1)
 
-    return Options(lock_path=lock_path, verbose=args.verbose)
+    return Options(lock_path=lock_path, verbose=args.verbose, fail_if_multiple_versions=args.fail_if_multiple_versions)
 
 
 def main() -> None:
     options = parse_args()
     flake = analyze_flake(json.loads(options.lock_path.read_text()))
 
+    has_multiple_versions = False
     for url, aliases in flake.deps.items():
         if len(aliases) == 1:
             if options.verbose:
                 print(f"{url} is only used by {aliases[0]}")
             continue
         print(f"{url} has multiple versions:")
+        has_multiple_versions = True
         for alias in aliases:
             dependencies = flake.reverse_deps[alias]
             print(f"  {alias} is used by: {', '.join(dependencies)}")
 
+    if options.fail_if_multiple_versions and has_multiple_versions:
+        sys.exit(1)
 
 if __name__ == "__main__":
     main()
