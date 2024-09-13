@@ -1,6 +1,7 @@
 queue_rules:
   - name: default
-    merge_conditions: []
+    merge_conditions:
+      - check-success=buildbot/nix-build
 defaults:
   actions:
     queue:
