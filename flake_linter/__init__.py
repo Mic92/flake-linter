@@ -17,7 +17,7 @@ def flake_url(dep: dict[str, Any]) -> str | None:
             if host := locked.get("host"):  # gitlab / sourcehut
                 url += f"?host={host}"
             return url
-        case "git" | "hg":
+        case "git" | "hg" | "tarball":
             return f"{locked['type']}:{locked['url']}"
         case "path":
             return f"{locked['type']}:{locked['path']}"
