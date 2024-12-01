@@ -1,8 +1,5 @@
 queue_rules:
   - name: default
-    queue_conditions:
-      - base=main
-      - label~=merge-queue|dependencies
     merge_conditions:
     - check-success=buildbot/nix-build
     batch_size: 5
@@ -10,5 +7,7 @@ queue_rules:
 pull_request_rules:
   - name: merge using the merge queue
     conditions:
+      - base=main
+      - label~=merge-queue|dependencies
     actions:
       queue: {}
