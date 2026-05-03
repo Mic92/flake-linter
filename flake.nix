@@ -20,5 +20,9 @@
       packages = eachSystem (pkgs: {
         default = pkgs.python3.pkgs.callPackage ./default.nix { };
       });
+
+      checks = eachSystem (pkgs: {
+        package-default = self.packages.${pkgs.stdenv.hostPlatform.system}.default;
+      });
     };
 }
